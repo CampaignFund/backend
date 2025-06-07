@@ -37,13 +37,13 @@ const signup = async (req, res) => {
     if (!isValidPassword(password)) {
       return res.status(401).json({
         message:
-          "Password must be 12-18 characters long, include uppercase, lowercase, digit, special character, and not contain your name.",
+          "Password must be 6-18 characters long, include uppercase, lowercase, digit and atleast one special character",
       });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const otp = generateOTP();
-    
+    const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
     const newUser = await User.create({
       name,
@@ -52,8 +52,9 @@ const signup = async (req, res) => {
       password: hashedPassword,
       isVerifiedEmail: false,
       otp: otp,
+      otpExpiresAt: otpExpiresAt,
     });
-    const otpSent = await sendOtpForEmailVerification(name,email, otp);
+    const otpSent = await sendOtpForEmailVerification(name, email, otp);
     if (!otpSent) {
       return res.status(500).json({ msg: "Failed to send OTP" });
     }
@@ -70,25 +71,29 @@ const signup = async (req, res) => {
 };
 
 const verifyOTP = async (req, res) => {
-  const { userId, otp } = req.body;
+  const { otp } = req.body;
 
   try {
-    const user = await User.findById(userId);
-    if (!user) return res.status(404).json({ msg: "User not found" });
+    const user = await User.findOne({ otp });
 
-    if (user.otp !== otp) {
-      return res.status(401).json({ msg: "Invalid OTP" });
+    if (!user) {
+      return res.status(404).json({ msg: "Invalid or expired OTP" });
+    }
+
+    if (user.otpExpiresAt && user.otpExpiresAt < new Date()) {
+      return res.status(401).json({ msg: "OTP has expired. Please request a new one." });
     }
 
     user.isVerifiedEmail = true;
     user.otp = null;
+    user.otpExpiresAt = null;
     await user.save();
 
     return res.status(200).json({ msg: "Email verified successfully!" });
   } catch (error) {
-    return res
-      .status(500)
-      .json({ msg: `Server error from OTP verification: ${error.message}` });
+    return res.status(500).json({
+      msg: `Server error from OTP verification: ${error.message}`,
+    });
   }
 };
 
@@ -101,13 +106,19 @@ const login = async (req, res) => {
       return res.status(404).json({ msg: "User not found" });
     }
 
+    if (!user.isVerifiedEmail) {
+      return res.status(403).json({ msg: "Email not verified. Please verify your email before logging in." });
+    }
+
     const matchPassword = await bcrypt.compare(password, user.password);
     if (!matchPassword) {
       return res.status(401).json({ msg: "Password not matched" });
     }
 
     const payload = createPayload(user);
-    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "24h" });
+    const token = jwt.sign(payload, process.env.JWT_SECRET, {
+      expiresIn: "24h",
+    });
 
     return res.status(200).json({
       message: "Login successful",
@@ -116,6 +127,38 @@ const login = async (req, res) => {
     });
   } catch (error) {
     return res.status(500).json({ msg: `Server error: ${error}` });
+  }
+};
+
+const resendOTP = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ msg: "User not found" });
+    }
+
+    if (user.isVerifiedEmail) {
+      return res.status(400).json({ msg: "Email is already verified" });
+    }
+
+    const otp = generateOTP(); 
+    const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); 
+
+    user.otp = otp;
+    user.otpExpiresAt = otpExpiresAt;
+    await user.save();
+
+    const sent = await sendOtpForEmailVerification(user.name, user.email, otp);
+    if (!sent) {
+      return res.status(500).json({ msg: "Failed to send OTP" });
+    }
+
+    return res.status(200).json({ msg: "OTP resent successfully" });
+  } catch (error) {
+    return res.status(500).json({ msg: `Server error: ${error.message}` });
   }
 };
 
@@ -128,7 +171,7 @@ const forgotPassword = async (req, res) => {
       return res.status(404).json({ msg: "User not found" });
     }
 
-    const resetToken = jwt.sign({ userId: user._id }, process.env.SECRET, {
+    const resetToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
 
@@ -166,10 +209,10 @@ const handleResetPassword = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    if (!isValidPassword(newPassword)) {
+   if (!isValidPassword(password)) {
       return res.status(401).json({
         message:
-          "Password must be 12-18 characters long, include uppercase, lowercase, digit, special character, and not contain your name.",
+          "Password must be 6-18 characters long, include uppercase, lowercase, digit and atleast one special character",
       });
     }
 
@@ -190,6 +233,7 @@ module.exports = {
   signup,
   verifyOTP,
   login,
+  resendOTP,
   forgotPassword,
   handleResetPassword,
 };

@@ -16,7 +16,7 @@ const createFundSchema = new mongoose.Schema(
       type: String,
       enum: [
         "animal",
-        "business", 
+        "business",
         "community",
         "competition",
         "creative",
@@ -26,47 +26,89 @@ const createFundSchema = new mongoose.Schema(
         "events",
         "faith",
         "family",
-        "funerals_memorials", 
+        "funerals_memorials",
         "medical",
         "monthly_bills",
         "newly_weds",
         "other",
         "sports",
         "travel",
-        "ukraine_relief", 
+        "ukraine_relief",
         "volunteer",
         "wishes",
       ],
       required: true,
     },
-    fundRaisingFor: {
-      
-      type: String,
-      enum: ["yourself", "someone_else", "charity"],
-      required: true,
-    },
-    donationAmount: {
-      type: Number,
-      required: true,
-      min: [1, "Donation amount must be at least 1"],
-    },
+
     fundraiseTitle: {
-     
       type: String,
       required: true,
       trim: true,
     },
     fundraiseStory: {
-     type: String,
+      type: String,
       required: true,
       trim: true,
     },
-    
+
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true, 
+      ref: "user",
+      required: true,
     },
+
+    accountHolderName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    accountNumber: {
+      type: Object,
+      required: true,
+    },
+    ifscCode: {
+      type: Object,
+      required: true,
+    },
+
+    bankName: {
+      type: String,
+      trim: true,
+      required: true,
+    },
+
+    upiId: {
+      type: String,
+      trim: true,
+      required: true,
+    },
+
+    qrCodeImage: {
+      type: String,
+      validate: {
+        validator: function (value) {
+          return value.startsWith("http");
+        },
+        message: "QR code image must be a valid image URL",
+      },
+    },
+    donationAmount: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+
+    totalAmountRaised: {
+      type: Number,
+      required: true,
+      min: [1, "Donation amount must be at least 1"],
+    },
+    donators: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Donator",
+      },
+    ],
   },
   { timestamps: true }
 );
