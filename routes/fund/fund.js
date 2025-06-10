@@ -1,19 +1,14 @@
 const express = require("express");
+const upload = require("../../middleware/cloundinaryUpload");
+const checkForAuthenticationCookie = require("../../middleware/authMiddleware");
+const { handleCreateFund, getAllFunds, getFundById, getDonatorsByFundId } = require("../../controllers/fundController");
 const router = express.Router();
-const parser = require("../../middleware/upload");
-const {
-  createFund,
-  getAllFunds,
-  getFundById,
-  getDonatorsByFundId,
-} = require("../../controllers/fundController");
-const authMiddleware = require("../../middleware/authMiddleware");
 
 router.post(
   "/fundraise",
-  authMiddleware,
-  parser.single("qrCodeImage"),
-  createFund
+  checkForAuthenticationCookie("token"),
+  upload.single("qrCodeImage"),
+  handleCreateFund
 );
 
 router.get("/fund-list", getAllFunds);

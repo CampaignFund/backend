@@ -1,14 +1,14 @@
 const User = require("../models/userModel");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const createPayload = require("../utils/payload");
 const {
   sendResetPassword,
-  sendOtpForEmailVerification,
-} = require("../service/emailService");
+} = require("../emailService/emailService");
+const { createToken } = require("../authService/authService");
+const setTokenCookie = require("../authService/setTokenCookie");
+const clearTokenCookie = require("../authService/clearCookie");
 
-const generateOTP = () =>
-  Math.floor(100000 + Math.random() * 900000).toString();
+
 const isValidPassword = (password) => {
   return (
     /[A-Z]/.test(password) &&
@@ -21,8 +21,8 @@ const isValidPassword = (password) => {
 };
 
 const signup = async (req, res) => {
-  const { name, phone, email, password } = req.body;
-  if (!name || !email || !password || !phone) {
+  const { fullName, phone, email, password } = req.body;
+  if (!fullName || !email || !password || !phone) {
     return res.json({ success: false, message: "All fields are required" });
   }
 
@@ -34,6 +34,7 @@ const signup = async (req, res) => {
         .json({ msg: "User already exists. Please log in." });
     }
 
+
     if (!isValidPassword(password)) {
       return res.status(401).json({
         message:
@@ -42,60 +43,26 @@ const signup = async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const otp = generateOTP();
-    const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
 
     const newUser = await User.create({
-      name,
+      fullName,
       phone,
       email,
       password: hashedPassword,
-      isVerifiedEmail: false,
-      otp: otp,
-      otpExpiresAt: otpExpiresAt,
     });
-    const otpSent = await sendOtpForEmailVerification(name, email, otp);
-    if (!otpSent) {
-      return res.status(500).json({ msg: "Failed to send OTP" });
-    }
-
     return res.status(201).json({
-      msg: "Signup successful! OTP sent to your phone.",
-      userId: newUser._id,
+      msg: "Signup successful, Please Login",
+      user:newUser
     });
   } catch (error) {
-    res
-      .status(500)
-      .json({ msg: `Internal server error from user signup: ${error}` });
-  }
-};
-
-const verifyOTP = async (req, res) => {
-  const { otp } = req.body;
-
-  try {
-    const user = await User.findOne({ otp });
-
-    if (!user) {
-      return res.status(404).json({ msg: "Invalid or expired OTP" });
-    }
-
-    if (user.otpExpiresAt && user.otpExpiresAt < new Date()) {
-      return res.status(401).json({ msg: "OTP has expired. Please request a new one." });
-    }
-
-    user.isVerifiedEmail = true;
-    user.otp = null;
-    user.otpExpiresAt = null;
-    await user.save();
-
-    return res.status(200).json({ msg: "Email verified successfully!" });
-  } catch (error) {
-    return res.status(500).json({
-      msg: `Server error from OTP verification: ${error.message}`,
+    console.log(error);
+      res.status(500).json({
+      msg: `Internal server error from user signup: ${error}`,
     });
   }
 };
+
 
 const login = async (req, res) => {
   const { email, password } = req.body;
@@ -105,9 +72,8 @@ const login = async (req, res) => {
     if (!user) {
       return res.status(404).json({ msg: "User not found" });
     }
-
-    if (!user.isVerifiedEmail) {
-      return res.status(403).json({ msg: "Email not verified. Please verify your email before logging in." });
+  if (user.status !== "active") {
+      return res.status(403).json({ msg: `Account is ${user.status}` });
     }
 
     const matchPassword = await bcrypt.compare(password, user.password);
@@ -115,52 +81,24 @@ const login = async (req, res) => {
       return res.status(401).json({ msg: "Password not matched" });
     }
 
-    const payload = createPayload(user);
-    const token = jwt.sign(payload, process.env.JWT_SECRET, {
-      expiresIn: "24h",
-    });
+    const token = createToken(user);
+    setTokenCookie(res, token);
 
     return res.status(200).json({
       message: "Login successful",
       token,
-      user: payload,
+      user
     });
   } catch (error) {
     return res.status(500).json({ msg: `Server error: ${error}` });
   }
 };
 
-const resendOTP = async (req, res) => {
-  const { email } = req.body;
-
-  try {
-    const user = await User.findOne({ email });
-
-    if (!user) {
-      return res.status(404).json({ msg: "User not found" });
-    }
-
-    if (user.isVerifiedEmail) {
-      return res.status(400).json({ msg: "Email is already verified" });
-    }
-
-    const otp = generateOTP(); 
-    const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); 
-
-    user.otp = otp;
-    user.otpExpiresAt = otpExpiresAt;
-    await user.save();
-
-    const sent = await sendOtpForEmailVerification(user.name, user.email, otp);
-    if (!sent) {
-      return res.status(500).json({ msg: "Failed to send OTP" });
-    }
-
-    return res.status(200).json({ msg: "OTP resent successfully" });
-  } catch (error) {
-    return res.status(500).json({ msg: `Server error: ${error.message}` });
-  }
+const handleLogout = (req, res) => {
+  clearTokenCookie(res);
+  res.status(200).json({ message: "Logged out successfully" });
 };
+
 
 const forgotPassword = async (req, res) => {
   try {
@@ -177,13 +115,14 @@ const forgotPassword = async (req, res) => {
 
     const resetLink = `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
 
-    const emailSent = await sendResetPassword(user.name, user.email, resetLink);
+    const emailSent = await sendResetPassword(user.fullName, user.email, resetLink);
 
     if (!emailSent) {
       return res.status(500).json({ msg: "Failed to send reset email" });
     }
 
     return res.status(200).json({
+      resetLink,
       msg: "Reset link sent to your email successfully",
     });
   } catch (error) {
@@ -202,14 +141,14 @@ const handleResetPassword = async (req, res) => {
       return res.status(400).json({ message: "Reset token is required" });
     }
 
-    const decoded = jwt.verify(resetToken, process.env.SECRET);
+    const decoded = jwt.verify(resetToken, process.env.JWT_SECRET);
     const user = await User.findById(decoded.userId);
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-   if (!isValidPassword(password)) {
+   if (!isValidPassword(newPassword)) {
       return res.status(401).json({
         message:
           "Password must be 6-18 characters long, include uppercase, lowercase, digit and atleast one special character",
@@ -231,9 +170,8 @@ const handleResetPassword = async (req, res) => {
 
 module.exports = {
   signup,
-  verifyOTP,
   login,
-  resendOTP,
+  handleLogout,
   forgotPassword,
   handleResetPassword,
 };

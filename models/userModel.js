@@ -2,13 +2,20 @@ const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema(
   {
-    name: {
+    googleId: {
       type: String,
-      required: true,
+      unique: true,
+    },
+    status: {
+      type: String,
+      enum: ["active", "pending", "deleted"],
+      default: "active",
+    },
+    fullName: {
+      type: String,
     },
     phone: {
       type: String,
-      required: true,
       unique: true,
     },
     email: {
@@ -18,23 +25,11 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: true,
     },
     role: {
       type: String,
       enum: ["user", "admin"],
       default: "user",
-      required: true,
-    },
-    isVerifiedEmail: {
-      type: Boolean,
-      default: false,
-    },
-     otp: {
-      type: String,
-    },
-    otpExpiresAt: {
-      type: Date,
     },
   },
   { timestamps: true }
