@@ -10,7 +10,6 @@ const { createToken } = require("../authService/authService");
 const setTokenCookie = require("../authService/setTokenCookie");
 const clearTokenCookie = require("../authService/clearCookie");
 
-
 const isValidPassword = (password) => {
   return (
     /[A-Z]/.test(password) &&
@@ -86,10 +85,12 @@ const login = async (req, res) => {
     const token = createToken(user);
     setTokenCookie(res, token);
 
+      const { password: _, ...userWithoutPassword } = user.toObject();
+
     return res.status(200).json({
       message: "Login successful",
       token,
-      user
+        user: userWithoutPassword,
     });
   } catch (error) {
     return res.status(500).json({ msg: `Server error: ${error}` });
