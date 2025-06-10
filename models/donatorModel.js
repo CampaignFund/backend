@@ -2,28 +2,39 @@ const mongoose = require("mongoose");
 
 const donatorSchema = new mongoose.Schema(
   {
-    userId: { 
-      type: mongoose.Schema.Types.ObjectId, 
-      ref: "user", 
-      required: true 
-    }, 
-    fundId: { 
-      type: mongoose.Schema.Types.ObjectId, 
-      ref: "CreateFund", 
-      required: true 
-    }, 
-    amount: { 
-      type: Number, 
-      required: true 
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "user",
+      required: true,
     },
-    donatedAt: { 
-      type: Date, 
-      default: Date.now 
+    fundId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "CreateFund",
+      required: true,
     },
-     proofImage: {
+    fullName: {
       type: String,
-      required:true,
-      trim: true,
+      required: true,
+    },
+    email: {
+      type: String,
+      required: true,
+    },
+    contactNumber: {
+      type: Number,
+      required: true,
+    },
+    amount: {
+      type: Number,
+      required: true,
+    },
+    donatedAt: {
+      type: Date,
+      default: Date.now,
+    },
+    proofImage: {
+      type: String,
+      required: true,
     },
   },
   { timestamps: true }

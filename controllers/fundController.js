@@ -1,10 +1,10 @@
+const { encrypt, decrypt } = require("../encryption/encrypt");
 const CreateFund = require("../models/createFundModel");
 const Donator = require("../models/donatorModel");
 const User = require("../models/userModel");
-const { encrypt,decrypt } = require("../utils/encrypt");
 
 
-const createFund = async (req, res) => {
+const handleCreateFund = async (req, res) => {
   try {
     const {
       country,
@@ -83,7 +83,6 @@ const getAllFunds = async (req, res) => {
       .populate("donators")
       .sort({ createdAt: -1 });
 
-    // Decrypt sensitive fields for each fund
     const decryptedFunds = funds.map((fund) => {
       return {
         ...fund._doc,
@@ -154,7 +153,7 @@ const getDonatorsByFundId = async (req, res) => {
 
 
 module.exports = {
-  createFund,
+ handleCreateFund,
   getAllFunds,
   getFundById,
   getDonatorsByFundId,

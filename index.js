@@ -1,11 +1,35 @@
-require('dotenv').config(); // Load env variables
+require('dotenv').config(); 
 
 const express = require("express");
+const cors = require("cors");
+const cookieParser = require('cookie-parser');
+
+
 const app = express();
+const PORT = process.env.PORT || 5001;
 
-const PORT = process.env.PORT || 3000;
+const allowedOrigins = [process.env.CLIENT_URL];
 
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        return callback(new Error("Not allowed by CORS"));
+      }
+    },
+    methods: ["GET", "POST", "PUT", "DELETE","PATCH"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  })
+);
+
+
+app.use(cookieParser());
 app.use(express.json()); 
+app.use(express.urlencoded({ extended: false }));
 
 
 const connectDB = require('./config/mongoDBConnection/db');
@@ -14,11 +38,9 @@ connectDB();
 const userRoute = require('./routes/auth/user');
 const fundRoute = require('./routes/fund/fund')
 const donarRoute = require('./routes/donar/donar')
-app.get("/", (req, res) => {
-  res.send("Server is up!");
-});
 
-app.use("/api/user", userRoute);
+
+app.use("/api/auth", userRoute);
 app.use("/api/fund", fundRoute);
 app.use("/api/donar", donarRoute);
 

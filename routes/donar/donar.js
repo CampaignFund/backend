@@ -1,12 +1,12 @@
 const express = require("express");
 const router = express.Router();
-const parser = require("../../middleware/upload");
 const {donateAmount} = require("../../controllers/donarController");
-const authMiddleware  = require("../../middleware/authMiddleware");
+const upload = require("../../middleware/cloundinaryUpload");
+const checkForAuthenticationCookie = require("../../middleware/authMiddleware");
 router.post(
   "/donate",
-  authMiddleware,
-  parser.single("proofImage"), 
+  checkForAuthenticationCookie("token"),
+  upload.single("proofImage"), 
   donateAmount
 );
 

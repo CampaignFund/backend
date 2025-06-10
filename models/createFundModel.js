@@ -95,12 +95,15 @@ const createFundSchema = new mongoose.Schema(
     donationAmount: {
       type: Number,
       default: 0,
-      min: 0,
+      min: 500,
+    },
+    isApproved: {
+      type: Boolean,
+      default: false,
     },
 
     totalAmountRaised: {
       type: Number,
-      required: true,
       min: [1, "Donation amount must be at least 1"],
     },
     donators: [
