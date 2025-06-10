@@ -2,10 +2,6 @@ const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema(
   {
-    googleId: {
-      type: String,
-      unique: true,
-    },
     status: {
       type: String,
       enum: ["active", "pending", "deleted"],
@@ -18,14 +14,8 @@ const userSchema = new mongoose.Schema(
       type: String,
       unique: true,
     },
-       profilePhoto: {
+    profilePhoto: {
       type: String,
-      validate: {
-        validator: function (value) {
-          return value.startsWith("http");
-        },
-        message: "QR code image must be a valid image URL",
-      },
     },
     email: {
       type: String,

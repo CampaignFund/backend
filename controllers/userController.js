@@ -26,6 +26,7 @@ const signup = async (req, res) => {
   if (!fullName || !email || !password || !phone) {
     return res.json({ success: false, message: "All fields are required" });
   }
+   const profilePhoto = req.file ? req.file.path : null;
 
   try {
     const existingUser = await User.findOne({ email });
@@ -51,6 +52,7 @@ const signup = async (req, res) => {
       phone,
       email,
       password: hashedPassword,
+      profilePhoto
     });
     return res.status(201).json({
       msg: "Signup successful, Please Login",
