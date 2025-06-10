@@ -1,4 +1,6 @@
 const User = require("../models/userModel");
+const CreateFund = require("../models/createFundModel"); 
+const Donator = require("../models/donatorModel");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const {
@@ -168,10 +170,36 @@ const handleResetPassword = async (req, res) => {
   }
 };
 
+const getUserProfileWithFundAndDonations = async (req, res) => {
+  try {
+    const userId = req.user.id; 
+    const user = await User.findById(userId).select("-password -__v");
+    if (!user) {
+      return res.status(404).json({ msg: "User not found" });
+    }
+
+    const createdFunds = await CreateFund.find({ userId }).populate("donators");
+    const donations = await Donator.find({ userId }).populate({
+      path: "fundId",
+      select: "fundraiseTitle fundCategory",
+    });
+
+    return res.status(200).json({
+      user,
+      createdFunds,
+      donations,
+    });
+  } catch (error) {
+    console.error("Error fetching profile:", error);
+    res.status(500).json({ msg: "Server error fetching profile" });
+  }
+};
+
 module.exports = {
   signup,
   login,
   handleLogout,
   forgotPassword,
   handleResetPassword,
+  getUserProfileWithFundAndDonations
 };

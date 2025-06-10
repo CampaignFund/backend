@@ -59,28 +59,22 @@ const createFundSchema = new mongoose.Schema(
 
     accountHolderName: {
       type: String,
-      required: true,
-      trim: true,
     },
     accountNumber: {
       type: Object,
-      required: true,
     },
     ifscCode: {
       type: Object,
-      required: true,
     },
 
     bankName: {
       type: String,
       trim: true,
-      required: true,
     },
 
     upiId: {
       type: String,
       trim: true,
-      required: true,
     },
 
     qrCodeImage: {

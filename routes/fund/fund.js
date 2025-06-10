@@ -5,7 +5,7 @@ const { handleCreateFund, getAllFunds, getFundById, getDonatorsByFundId } = requ
 const router = express.Router();
 
 router.post(
-  "/fundraise",
+  "/create-fundraise",
   checkForAuthenticationCookie("token"),
   upload.single("qrCodeImage"),
   handleCreateFund

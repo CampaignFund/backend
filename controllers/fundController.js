@@ -1,8 +1,11 @@
+const {
+  sendFundApprovalMailToAdmin,
+  sendFundCreationMailToUser,
+} = require("../emailService/emailService");
 const { encrypt, decrypt } = require("../encryption/encrypt");
 const CreateFund = require("../models/createFundModel");
 const Donator = require("../models/donatorModel");
 const User = require("../models/userModel");
-
 
 const handleCreateFund = async (req, res) => {
   try {
@@ -19,8 +22,8 @@ const handleCreateFund = async (req, res) => {
       upiId,
       totalAmountRaised,
     } = req.body;
-
-    const userId = req.user.id;
+    const user = req.user;
+    const userId = req.user?.id;
 
     if (
       !country ||
@@ -28,24 +31,17 @@ const handleCreateFund = async (req, res) => {
       !fundCategory ||
       !fundraiseTitle ||
       !fundraiseStory ||
-      !accountHolderName ||
-      !accountNumber ||
-      !ifscCode ||
-      !bankName ||
-      !upiId ||
       !totalAmountRaised
     ) {
       return res.status(400).json({ msg: "Please fill all required fields" });
     }
 
-    if (!req.file) {
-      return res.status(400).json({ msg: "QR code image is required" });
-    }
+    const qrCodeImage = req.file ? req.file.path : null;
 
-    const qrCodeImage = req.file.path;
-
-    const encryptedAccountNumber = encrypt(accountNumber);
-    const encryptedIFSC = encrypt(ifscCode);
+    const encryptedAccountNumber = accountNumber
+      ? encrypt(accountNumber)
+      : null;
+    const encryptedIFSC = ifscCode ? encrypt(ifscCode) : null;
 
     const newFund = new CreateFund({
       userId,
@@ -61,10 +57,26 @@ const handleCreateFund = async (req, res) => {
       bankName,
       upiId,
       qrCodeImage,
+      isApproved: false,
       totalAmountRaised,
     });
 
     await newFund.save();
+    await sendFundApprovalMailToAdmin({
+      fund: newFund,
+      user: {
+        name: req.user.fullName,
+        email: req.user.email,
+      },
+    });
+
+    await sendFundCreationMailToUser({
+      fund: newFund,
+      user: {
+        name: req.user.fullName,
+        email: req.user.email,
+      },
+    });
 
     res.status(201).json({
       msg: "Fundraising created successfully!",
@@ -75,7 +87,6 @@ const handleCreateFund = async (req, res) => {
     res.status(500).json({ msg: "Server error" });
   }
 };
-
 
 const getAllFunds = async (req, res) => {
   try {
@@ -127,14 +138,13 @@ const getFundById = async (req, res) => {
   }
 };
 
-
 const getDonatorsByFundId = async (req, res) => {
   const { fundId } = req.params;
 
   try {
     const donators = await Donator.find({ fundId })
       .populate("userId", "name email") // Only include name and email of the user
-      .sort({ donatedAt: -1 });         // Optional: newest donations first
+      .sort({ donatedAt: -1 }); // Optional: newest donations first
 
     if (!donators.length) {
       return res.status(404).json({ msg: "No donators found for this fund" });
@@ -151,9 +161,8 @@ const getDonatorsByFundId = async (req, res) => {
   }
 };
 
-
 module.exports = {
- handleCreateFund,
+  handleCreateFund,
   getAllFunds,
   getFundById,
   getDonatorsByFundId,

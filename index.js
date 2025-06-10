@@ -38,9 +38,11 @@ connectDB();
 const userRoute = require('./routes/auth/user');
 const fundRoute = require('./routes/fund/fund')
 const donarRoute = require('./routes/donar/donar')
+const ProfileRoute = require('./routes/profile/userProfile')
 
 
 app.use("/api/auth", userRoute);
+app.use("/api/user", ProfileRoute);
 app.use("/api/fund", fundRoute);
 app.use("/api/donar", donarRoute);
 
