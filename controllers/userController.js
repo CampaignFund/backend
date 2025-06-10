@@ -195,11 +195,45 @@ const getUserProfileWithFundAndDonations = async (req, res) => {
   }
 };
 
+
+const updateUserProfile = async (req, res) => {
+  try {
+    const userId = req.user.id; 
+
+    const { fullName, phone } = req.body;
+    const profilePhoto = req.file ? req.file.path : undefined;
+
+    const updateData = {};
+    if (fullName) updateData.fullName = fullName;
+    if (phone) updateData.phone = phone;
+    if (profilePhoto) updateData.profilePhoto = profilePhoto;
+
+    const updatedUser = await User.findByIdAndUpdate(userId, updateData, {
+      new: true,
+      select: "-password", 
+    });
+
+    if (!updatedUser) {
+      return res.status(404).json({ msg: "User not found" });
+    }
+
+    res.status(200).json({
+      msg: "Profile updated successfully",
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.error("Update error:", error);
+    res.status(500).json({ msg: "Server error while updating profile" });
+  }
+};
+
+
 module.exports = {
   signup,
   login,
   handleLogout,
   forgotPassword,
   handleResetPassword,
-  getUserProfileWithFundAndDonations
+  getUserProfileWithFundAndDonations,
+  updateUserProfile
 };

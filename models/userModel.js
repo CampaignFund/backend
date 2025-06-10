@@ -18,6 +18,15 @@ const userSchema = new mongoose.Schema(
       type: String,
       unique: true,
     },
+       profilePhoto: {
+      type: String,
+      validate: {
+        validator: function (value) {
+          return value.startsWith("http");
+        },
+        message: "QR code image must be a valid image URL",
+      },
+    },
     email: {
       type: String,
       required: true,
