@@ -21,6 +21,8 @@ backend/
 │   ├── auth/
 │   ├── donar/
 │   ├── fund/
+│   ├── adminRoute/
+│   └── googleAuthRoute/
 │   └── profile/
 ├── .env                      # Environment variables
 ├── index.js                  # App entry point
@@ -71,6 +73,11 @@ CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
 EMAIL_USER=your_email@gmail.com
 EMAIL_PASS=your_email_password
+CLIENT_URL = http://localhost:5173
+GOOGLE_CLIENT_ID = your_google_client_id
+GOOGLE_CLIENT_SECRET = your_google_client_secret
+GOOGLE_REDIRECT_URI = "http://localhost:5000/api/auth/google/callback"
+
 ```
 
 ---
