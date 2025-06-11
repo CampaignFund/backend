@@ -40,9 +40,11 @@ const fundRoute = require('./routes/fund/fund');
 const donarRoute = require('./routes/donar/donar');
 const ProfileRoute = require('./routes/profile/userProfile');
 const  googleAuthRoute = require('./routes/googleAuthRoute/loginWithGoogle');
+const fundRaiseApprovalRoute = require('./routes/adminRoute/fundRaiseApproval');
 
 
 app.use("/api/auth", userAuthRoute,googleAuthRoute);
+app.use("/api/admin", fundRaiseApprovalRoute);
 app.use("/api/user", ProfileRoute);
 app.use("/api/fund", fundRoute);
 app.use("/api/donar", donarRoute);

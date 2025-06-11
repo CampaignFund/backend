@@ -20,6 +20,7 @@ const handleCreateFund = async (req, res) => {
       ifscCode,
       bankName,
       upiId,
+      bankCode,
       totalAmountRaised,
     } = req.body;
     const user = req.user;
@@ -36,7 +37,8 @@ const handleCreateFund = async (req, res) => {
       return res.status(400).json({ msg: "Please fill all required fields" });
     }
 
-    const qrCodeImage = req.file ? req.file.path : null;
+    const qrCodeImage = req.files?.qrCodeImage?.[0]?.path || null;
+    const coverImage = req.files?.coverImage?.[0]?.path || null;
 
     const encryptedAccountNumber = accountNumber
       ? encrypt(accountNumber)
@@ -54,9 +56,11 @@ const handleCreateFund = async (req, res) => {
       accountHolderName,
       accountNumber: encryptedAccountNumber,
       ifscCode: encryptedIFSC,
+      bankCode,
       bankName,
       upiId,
       qrCodeImage,
+      coverImage,
       isApproved: false,
       totalAmountRaised,
     });
@@ -90,17 +94,27 @@ const handleCreateFund = async (req, res) => {
 
 const getAllFunds = async (req, res) => {
   try {
-    const funds = await CreateFund.find()
+    const { search } = req.query;
+
+    const filter = { isApproved: true };
+
+    if (search) {
+      filter.$or = [
+        { fundCategory: { $regex: search, $options: "i" } },
+        { fundraiseTitle: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    const funds = await CreateFund.find(filter)
       .populate("donators")
+      .populate("userId", "fullName email")
       .sort({ createdAt: -1 });
 
-    const decryptedFunds = funds.map((fund) => {
-      return {
-        ...fund._doc,
-        accountNumber: decrypt(fund.accountNumber),
-        ifscCode: decrypt(fund.ifscCode),
-      };
-    });
+    const decryptedFunds = funds.map((fund) => ({
+      ...fund._doc,
+      accountNumber: fund.accountNumber ? decrypt(fund.accountNumber) : null,
+      ifscCode: fund.ifscCode ? decrypt(fund.ifscCode) : null,
+    }));
 
     res.status(200).json({
       success: true,
@@ -117,9 +131,14 @@ const getFundById = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const fund = await CreateFund.findById(id).populate("donators");
+    const fund = await CreateFund.findOne({
+      _id: id,
+      isApproved: true,
+    })
+      .populate("donators")
+      .populate("userId", "fullName email");
     if (!fund) {
-      return res.status(404).json({ msg: "Fund not found" });
+      return res.status(404).json({ msg: "Fund not found or not approved" });
     }
 
     const decryptedFund = {

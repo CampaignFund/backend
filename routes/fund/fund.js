@@ -7,12 +7,15 @@ const router = express.Router();
 router.post(
   "/create-fundraise",
   checkForAuthenticationCookie("token"),
-  upload.single("qrCodeImage"),
+   upload.fields([
+    { name: "qrCodeImage", maxCount: 1 },
+    { name: "coverImage", maxCount: 1 },
+  ]),
   handleCreateFund
 );
 
 router.get("/fund-list", getAllFunds);
-router.get("/fund-by-id/:id", getFundById);
+router.get("/fund-list/:id", getFundById);
 router.get("/donar-by-fundId/:fundId", getDonatorsByFundId);
 
 module.exports = router;

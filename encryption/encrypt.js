@@ -13,12 +13,20 @@ const encrypt = (text) => {
   encrypted += cipher.final("hex");
   return encrypted;
 };
-
 const decrypt = (encryptedText) => {
-  const decipher = crypto.createDecipheriv(algorithm, key, iv);
-  let decrypted = decipher.update(encryptedText, "hex", "utf8");
-  decrypted += decipher.final("utf8");
-  return decrypted;
+  try {
+    if (!encryptedText || typeof encryptedText !== 'string') {
+      console.warn("Empty or invalid encrypted text:", encryptedText);
+      return null;
+    }
+    const decipher = crypto.createDecipheriv(algorithm, key, iv);
+    let decrypted = decipher.update(encryptedText, "hex", "utf8");
+    decrypted += decipher.final("utf8");
+    return decrypted;
+  } catch (err) {
+    console.error("Decryption failed:", err.message);
+    return null;
+  }
 };
 
 module.exports = { encrypt, decrypt };

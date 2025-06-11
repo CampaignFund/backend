@@ -66,6 +66,9 @@ const createFundSchema = new mongoose.Schema(
     ifscCode: {
       type: Object,
     },
+      bankCode: {
+      type: Object,
+    },
 
     bankName: {
       type: String,
@@ -79,17 +82,13 @@ const createFundSchema = new mongoose.Schema(
 
     qrCodeImage: {
       type: String,
-      validate: {
-        validator: function (value) {
-          return value.startsWith("http");
-        },
-        message: "QR code image must be a valid image URL",
-      },
+    },
+     coverImage: {
+      type: String,
     },
     donationAmount: {
       type: Number,
       default: 0,
-      min: 500,
     },
     isApproved: {
       type: Boolean,
@@ -98,7 +97,7 @@ const createFundSchema = new mongoose.Schema(
 
     totalAmountRaised: {
       type: Number,
-      min: [1, "Donation amount must be at least 1"],
+       min: 500,
     },
     donators: [
       {
