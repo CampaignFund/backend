@@ -14,7 +14,7 @@ backend/
 ├── config/                   # Cloudinary and DB config
 ├── controllers/              # All controller logic
 ├── emailService/             # Nodemailer-based email logic
-├── encryption/               # Account number  encryption logic
+├── encryption/               # Account number encryption logic
 ├── middleware/               # Custom middleware (auth, roles, etc.)
 ├── models/                   # Mongoose schemas/models
 ├── routes/                   # Route definitions
@@ -104,8 +104,7 @@ All responses are in JSON format.
 
 Base URL : `http://localhost:5000`
 
-###  Auth Routes - `/api/auth`
-
+###  Auth Routes for Admin and User - `/api/auth`
 
 | Method | Endpoint       | Description           |
 |--------|----------------|-----------------------|
@@ -117,7 +116,7 @@ Base URL : `http://localhost:5000`
 
 ---
 
-###  Profile Routes - `/api/user`
+###  Profile Routes for Admin and User - `/api/user`
 
 | Method | Endpoint         | Description              |
 |--------|------------------|--------------------------|
@@ -126,7 +125,7 @@ Base URL : `http://localhost:5000`
 
 ---
 
-###  Fund-Create & Fund-List Routes - `/api/fund`
+###  Fund-Create & Fund-List Routes for User - `/api/fund`
 
 | Method | Endpoint         | Description                  |
 |--------|------------------|------------------------------|
@@ -141,11 +140,38 @@ Base URL : `http://localhost:5000`
 | Method | Endpoint         | Description                  |
 |--------|------------------|------------------------------|
 | GET   | `/fund-raise/pending-funds`        | Get All fundraising request   |
-| PUT    | `/fund-raise/approve-fund/:id`        | Approve fundraising request      |
-| DELETE    | `/fund-raise/reject-fund/:id`        | reject fundraising request      |
+| PUT   | `/fund-raise/approve-fund/:id`     | Approve fundraising request   |
+| DELET | `/fund-raise/reject-fund/:id`      | reject fundraising request    |  
+
+---
+
+###  Admin Routes for deletion Request - `/api/admin`
+
+| Method | Endpoint         | Description                  |
+|--------|------------------|------------------------------|
+| GET   | `/account-deletion/pending-requests`        | Get All deletion request   |
+| PUT   | `/account-deletion/approve/:id`             | Approve deletion request   |
+| PUT   | `/account-deletion/reject/:id`              | reject deletion request    |  
+
+---
+###  Admin Routes for User & fundraise details - `/api/admin`
+
+| Method | Endpoint         | Description                  |
+|--------|------------------|------------------------------|
+| GET   | `/users`                   | Get All users         |
+| PUT   | `/fundraisers`             | Get All fundraisers   | 
+
+---
+###  User Route for submit Account deletion Requests  - `/api/user`
+
+| Method | Endpoint         | Description                  |
+|--------|------------------|------------------------------|
+| POST   | `/account-deletion/request`     | Submit Account Deletion Requests   |
 
 
 ---
+
+
 
 
 ##  Tech Stack

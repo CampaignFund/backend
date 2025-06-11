@@ -5,6 +5,7 @@ const {
 } = require("../../controllers/userController");
 const checkForAuthenticationCookie = require("../../middleware/authMiddleware");
 const upload = require("../../middleware/cloundinaryUpload");
+const { handleRequestDeletion } = require("../../controllers/deletionController");
 const router = express.Router();
 
 router.get(
@@ -17,6 +18,12 @@ router.put(
   checkForAuthenticationCookie("token"),
   upload.single("profilePhoto"),
   updateUserProfile
+);
+
+router.post(
+  "/account-deletion/request",
+  checkForAuthenticationCookie("token"),
+  handleRequestDeletion
 );
 
 module.exports = router;

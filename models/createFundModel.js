@@ -90,6 +90,10 @@ const createFundSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+     donationCount: {
+      type: Number,
+      default: 0,
+    },
     isApproved: {
       type: Boolean,
       default: false,

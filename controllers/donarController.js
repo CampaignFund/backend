@@ -31,7 +31,9 @@ const donateAmount = async (req, res) => {
 
     await newDonor.save();
 
+    fund.donators.push(newDonor._id);
     fund.donationAmount += parseFloat(amount);
+    fund.donationCount += 1;
     await fund.save();
 
     res.status(201).json({

@@ -38,11 +38,14 @@ const donarRoute = require("./routes/donar/donar");
 const ProfileRoute = require("./routes/profile/userProfile");
 const googleAuthRoute = require("./routes/googleAuthRoute/loginWithGoogle");
 const fundRaiseApprovalRoute = require("./routes/adminRoute/fundRaiseApproval");
-
+const deletionRequestRoute = require("./routes/adminRoute/deletionRequest");
+const userDetailRoute = require("./routes/adminRoute/userDetails");
 app.use("/api/auth", userAuthRoute, googleAuthRoute);
 app.use(
   "/api/admin",
-  fundRaiseApprovalRoute
+  fundRaiseApprovalRoute,
+  deletionRequestRoute,
+  userDetailRoute
 );
 app.use("/api/user", ProfileRoute);
 app.use("/api/fund", fundRoute);
