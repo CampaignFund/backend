@@ -50,7 +50,9 @@ const googleCallback = async (req, res) => {
     const { sub: googleId, name, email, picture } = userResponse.data;
 
     if (!googleId) {
-      return res.status(400).json({ message: "Google ID missing from response" });
+      return res
+        .status(400)
+        .json({ message: "Google ID missing from response" });
     }
 
     let user = await User.findOne({ googleId });
@@ -72,21 +74,24 @@ const googleCallback = async (req, res) => {
           email,
           profilePhoto: picture,
           password: null,
+          role: "user",
         });
       }
     }
 
     const token = jwt.sign(
-      { id: user._id, email: user.email, name: user.fullName },
+      { id: user._id, email: user.email, name: user.fullName, role: user.role },
       JWT_SECRET,
       { expiresIn: "1h" }
     );
-
     setTokenCookie(res, token);
-const encodedName = encodeURIComponent(user.fullName);
-const encodedEmail = encodeURIComponent(user.email);
+    const encodedName = encodeURIComponent(user.fullName);
+    const encodedEmail = encodeURIComponent(user.email);
+    const encodedRole = encodeURIComponent(user.role);
 
-return res.redirect(`http://localhost:5173?name=${encodedName}&email=${encodedEmail}`);
+    return res.redirect(
+      `http://localhost:5173?name=${encodedName}&email=${encodedEmail}&role=${encodedRole}`
+    );
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Internal Server Error" });
