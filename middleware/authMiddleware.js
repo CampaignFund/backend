@@ -1,7 +1,7 @@
 const { parse } = require("cookie");
 const { validateToken } = require("../authService/authService");
 
-function checkForAuthentication() {
+function checkForAuthenticationCookie() {
   return (req, res, next) => {
     try {
       let token;
@@ -33,4 +33,4 @@ function checkForAuthentication() {
     }
   };
 }
-module.exports = checkForAuthentication;
+module.exports = checkForAuthenticationCookie;

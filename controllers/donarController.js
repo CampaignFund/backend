@@ -1,13 +1,13 @@
-const CreateFund = require("../models/createFundModel"); 
+const CreateFund = require("../models/createFundModel");
 const Donator = require("../models/donatorModel");
-const User = require('../models/userModel')
+
 const donateAmount = async (req, res) => {
   try {
-    const { fundId, amount } = req.body;
-    const userId = req.user.id;
+    const { fundId, amount, fullName, email, contactNumber } = req.body;
+    const userId = req.user ? req.user.id : null;
 
-    if (!fundId || !amount) {
-      return res.status(400).json({ msg: "Fund ID and amount are required" });
+    if (!fundId || !amount || !fullName || !email || !contactNumber) {
+      return res.status(400).json({ msg: "All fields are required" });
     }
 
     if (!req.file) {
@@ -22,14 +22,16 @@ const donateAmount = async (req, res) => {
     const newDonor = new Donator({
       userId,
       fundId,
+      fullName,
+      email,
+      contactNumber,
       amount,
       proofImage,
     });
 
     await newDonor.save();
 
-    fund.donationAmount += amount;
-    fund.donators.push(newDonor._id);
+    fund.donationAmount += parseFloat(amount);
     await fund.save();
 
     res.status(201).json({

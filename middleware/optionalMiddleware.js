@@ -1,7 +1,7 @@
 const { parse } = require("cookie");
 const { validateToken } = require("../authService/authService");
 
-function optionalAuthentication() {
+function optionalAuthenticationCookie() {
   return (req, res, next) => {
     try {
       let token;
@@ -34,4 +34,4 @@ function optionalAuthentication() {
     }
   };
 }
-module.exports = optionalAuthentication;
+module.exports = optionalAuthenticationCookie;

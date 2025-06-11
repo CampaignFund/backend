@@ -2,10 +2,10 @@ const express = require("express");
 const router = express.Router();
 const {donateAmount} = require("../../controllers/donarController");
 const upload = require("../../middleware/cloundinaryUpload");
-const checkForAuthenticationCookie = require("../../middleware/authMiddleware");
+const optionalAuthenticationCookie = require("../../middleware/optionalMiddleware");
 router.post(
   "/donate",
-  checkForAuthenticationCookie("token"),
+  optionalAuthenticationCookie("token"),
   upload.single("proofImage"), 
   donateAmount
 );
