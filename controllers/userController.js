@@ -1,11 +1,9 @@
 const User = require("../models/userModel");
-const CreateFund = require("../models/createFundModel"); 
+const CreateFund = require("../models/createFundModel");
 const Donator = require("../models/donatorModel");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const {
-  sendResetPassword,
-} = require("../emailService/emailService");
+const { sendResetPassword } = require("../emailService/emailService");
 const { createToken } = require("../authService/authService");
 const setTokenCookie = require("../authService/setTokenCookie");
 const clearTokenCookie = require("../authService/clearCookie");
@@ -26,7 +24,7 @@ const signup = async (req, res) => {
   if (!fullName || !email || !password || !phone) {
     return res.json({ success: false, message: "All fields are required" });
   }
-   const profilePhoto = req.file ? req.file.path : null;
+  const profilePhoto = req.file ? req.file.path : null;
 
   try {
     const existingUser = await User.findOne({ email });
@@ -35,7 +33,6 @@ const signup = async (req, res) => {
         .status(400)
         .json({ msg: "User already exists. Please log in." });
     }
-
 
     if (!isValidPassword(password)) {
       return res.status(401).json({
@@ -46,29 +43,27 @@ const signup = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-
     const newUserData = {
       fullName,
       phone,
       email,
       password: hashedPassword,
-      profilePhoto
+      profilePhoto,
     };
 
     const newUser = await User.create(newUserData);
 
     return res.status(201).json({
       msg: "Signup successful, Please Login",
-      user:newUser
+      user: newUser,
     });
   } catch (error) {
     console.log(error);
-      res.status(500).json({
+    res.status(500).json({
       msg: `Internal server error from user signup: ${error}`,
     });
   }
 };
-
 
 const login = async (req, res) => {
   const { email, password } = req.body;
@@ -78,7 +73,7 @@ const login = async (req, res) => {
     if (!user) {
       return res.status(404).json({ msg: "User not found" });
     }
-  if (user.status !== "active") {
+    if (user.status !== "active") {
       return res.status(403).json({ msg: `Account is ${user.status}` });
     }
 
@@ -90,12 +85,12 @@ const login = async (req, res) => {
     const token = createToken(user);
     setTokenCookie(res, token);
 
-      const { password: _, ...userWithoutPassword } = user.toObject();
+    const { password: _, ...userWithoutPassword } = user.toObject();
 
     return res.status(200).json({
       message: "Login successful",
       token,
-        user: userWithoutPassword,
+      user: userWithoutPassword,
     });
   } catch (error) {
     return res.status(500).json({ msg: `Server error: ${error}` });
@@ -103,10 +98,14 @@ const login = async (req, res) => {
 };
 
 const handleLogout = (req, res) => {
-  clearTokenCookie(res);
-  res.status(200).json({ message: "Logged out successfully" });
+  try {
+    clearTokenCookie(res);
+    res.status(200).json({ message: "Logged out successfully" });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ msg: `Server error: ${error}` });
+  }
 };
-
 
 const forgotPassword = async (req, res) => {
   try {
@@ -123,7 +122,11 @@ const forgotPassword = async (req, res) => {
 
     const resetLink = `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
 
-    const emailSent = await sendResetPassword(user.fullName, user.email, resetLink);
+    const emailSent = await sendResetPassword(
+      user.fullName,
+      user.email,
+      resetLink
+    );
 
     if (!emailSent) {
       return res.status(500).json({ msg: "Failed to send reset email" });
@@ -156,7 +159,7 @@ const handleResetPassword = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-   if (!isValidPassword(newPassword)) {
+    if (!isValidPassword(newPassword)) {
       return res.status(401).json({
         message:
           "Password must be 6-18 characters long, include uppercase, lowercase, digit and atleast one special character",
@@ -178,7 +181,7 @@ const handleResetPassword = async (req, res) => {
 
 const getUserProfileWithFundAndDonations = async (req, res) => {
   try {
-    const userId = req.user.id; 
+    const userId = req.user.id;
     const user = await User.findById(userId).select("-password -__v");
     if (!user) {
       return res.status(404).json({ msg: "User not found" });
@@ -201,10 +204,9 @@ const getUserProfileWithFundAndDonations = async (req, res) => {
   }
 };
 
-
 const updateUserProfile = async (req, res) => {
   try {
-    const userId = req.user.id; 
+    const userId = req.user.id;
 
     const { fullName, phone } = req.body;
     const profilePhoto = req.file ? req.file.path : undefined;
@@ -216,7 +218,7 @@ const updateUserProfile = async (req, res) => {
 
     const updatedUser = await User.findByIdAndUpdate(userId, updateData, {
       new: true,
-      select: "-password", 
+      select: "-password",
     });
 
     if (!updatedUser) {
@@ -233,7 +235,6 @@ const updateUserProfile = async (req, res) => {
   }
 };
 
-
 module.exports = {
   signup,
   login,
@@ -241,5 +242,5 @@ module.exports = {
   forgotPassword,
   handleResetPassword,
   getUserProfileWithFundAndDonations,
-  updateUserProfile
+  updateUserProfile,
 };
