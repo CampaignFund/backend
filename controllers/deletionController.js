@@ -28,7 +28,7 @@ const handleRequestDeletion = async (req, res) => {
 
 const getAllPendingDeletions = async (req, res) => {
   try {
-    const pendingRequests = await DeletionRequest.find()
+    const pendingRequests = await DeletionRequest.find({status:"pending"})
       .populate("userId", "fullName email")
       .sort({ createdAt: -1 });
     const enrichedRequests = await Promise.all(
