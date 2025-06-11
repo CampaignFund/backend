@@ -100,44 +100,46 @@ Base URL : `http://localhost:5000`
 ###  Auth Routes - `/api/auth`
 
 
-
 | Method | Endpoint       | Description           |
 |--------|----------------|-----------------------|
-| POST   | `/api/auth/signup`    | Register new user     |
-| POST   | `/api/auth/login`       | Login and get token   |
-| POST    | `/api/auth/logout`      | Logout and delete token |
-| POST    | `/api/auth/forget-password`      | forget password reset link  |
-| POST  | `/api/auth/reset-password`        | reset password from reset link|
+| POST   | `/signup`    | Register new user     |
+| POST   | `/login`       | Login and get token   |
+| POST    | `/logout`      | Logout and delete token |
+| POST    | `/forget-password`      | forget password reset link  |
+| POST  | `/reset-password`        | reset password from reset link|
 
 ---
 
-###  Profile Routes - `/api/profile`
+###  Profile Routes - `/api/user`
 
 | Method | Endpoint         | Description              |
 |--------|------------------|--------------------------|
-| GET    | `/api/user/profile`              | Get user profile         |
-| PUT    | `/api/user/update-profile`        | Update profile info      |
+| GET    | `/profile`              | Get user profile         |
+| PUT    | `update-profile`        | Update profile info      |
 
 ---
 
-###  Donor Routes - `/api/donar`
-
-| Method | Endpoint         | Description              |
-|--------|------------------|--------------------------|
-| POST   | `/donate`        | Make a donation          |
-| GET    | `/donations`     | List all donations       |
-
----
-
-###  Fund Routes - `/api/fund`
+###  Fund-Create & Fund-List Routes - `/api/fund`
 
 | Method | Endpoint         | Description                  |
 |--------|------------------|------------------------------|
-| POST   | `/create`        | Create fundraising request   |
-| GET    | `/all`           | Get all fundraisers          |
-| GET    | `/:id`           | Get fundraiser by ID         |
+| POST   | `/create-fundraise`     | Create fundraising request   |
+| GET    | `/fund-list`      | Get all fundraisers  with donars and user who created    |
+| GET    | `/fund-list/:id`    | Get fundraiser by ID with donars and user who created   |
+| GET    | `/fund-list?search=education`|Get fund by title or category,Search by keyword  |
+---
+
+###  Admin Routes for Approval - `/api/admin`
+
+| Method | Endpoint         | Description                  |
+|--------|------------------|------------------------------|
+| GET   | `/fund-raise/pending-funds`        | Get All fundraising request   |
+| PUT    | `/fund-raise/approve-fund/:id`        | Approve fundraising request      |
+| DELETE    | `/fund-raise/reject-fund/:id`        | reject fundraising request      |
+
 
 ---
+
 
 ##  Tech Stack
 
