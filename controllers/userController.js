@@ -47,13 +47,16 @@ const signup = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
 
-    const newUser = await User.create({
+    const newUserData = {
       fullName,
       phone,
       email,
       password: hashedPassword,
       profilePhoto
-    });
+    };
+
+    const newUser = await User.create(newUserData);
+
     return res.status(201).json({
       msg: "Signup successful, Please Login",
       user:newUser

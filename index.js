@@ -35,13 +35,14 @@ app.use(express.urlencoded({ extended: false }));
 const connectDB = require('./config/mongoDBConnection/db');
 connectDB();
 
-const userRoute = require('./routes/auth/user');
-const fundRoute = require('./routes/fund/fund')
-const donarRoute = require('./routes/donar/donar')
-const ProfileRoute = require('./routes/profile/userProfile')
+const userAuthRoute = require('./routes/auth/user');
+const fundRoute = require('./routes/fund/fund');
+const donarRoute = require('./routes/donar/donar');
+const ProfileRoute = require('./routes/profile/userProfile');
+const  googleAuthRoute = require('./routes/googleAuthRoute/loginWithGoogle');
 
 
-app.use("/api/auth", userRoute);
+app.use("/api/auth", userAuthRoute,googleAuthRoute);
 app.use("/api/user", ProfileRoute);
 app.use("/api/fund", fundRoute);
 app.use("/api/donar", donarRoute);
