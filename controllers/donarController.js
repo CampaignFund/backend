@@ -9,7 +9,7 @@ const donateAmount = async (req, res) => {
     if (!fundId || !amount || !fullName || !email || !contactNumber) {
       return res.status(400).json({ msg: "All fields are required" });
     }
-
+     
     if (!req.file) {
       return res.status(400).json({ msg: "Proof of donation image is required" });
     }
