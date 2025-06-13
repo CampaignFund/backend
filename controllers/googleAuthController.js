@@ -4,6 +4,7 @@ require("dotenv").config();
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 const GOOGLE_REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI;
+const CLIENT_URL = process.env.CLIENT_URL;
 const JWT_SECRET = process.env.JWT_SECRET;
 const qs = require("querystring");
 const User = require("../models/userModel");
@@ -90,7 +91,7 @@ const googleCallback = async (req, res) => {
     const encodedRole = encodeURIComponent(user.role);
 
     return res.redirect(
-      `https://frontend-zeta-nine-57.vercel.app/?name=${encodedName}&email=${encodedEmail}&role=${encodedRole}`
+      `${CLIENT_URL}/?name=${encodedName}&email=${encodedEmail}&role=${encodedRole}`
     );
   } catch (error) {
     console.error(error);
