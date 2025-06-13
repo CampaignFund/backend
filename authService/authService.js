@@ -11,7 +11,7 @@ function createToken(user) {
       fullName: user.fullName,
       email: user.email,
       role: user.role,
-      phone:user.phone
+      phone:user.phone || null
     };
     return JWT.sign(payload, process.env.JWT_SECRET, { expiresIn: "1d" });
   } catch (error) {
