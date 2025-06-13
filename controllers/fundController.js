@@ -127,6 +127,47 @@ const getAllFunds = async (req, res) => {
   }
 };
 
+const getTrendingFunds = async (req, res) => {
+  try {
+    const approvedFunds = await CreateFund.find({ isApproved: true })
+      .populate("donators")
+      .populate("userId", "fullName email");
+
+    const filteredFunds = approvedFunds.filter((fund) => {
+      const donationAmount = fund.donationAmount || 0;
+      const totalRaised = fund.totalAmountRaised || 0;
+
+      return (
+        totalRaised > 0 &&
+        (donationAmount >= totalRaised / 2 ||
+         donationAmount >= totalRaised / 3 ||
+         donationAmount >= totalRaised / 4)
+      );
+    });
+
+    const sortedFunds = filteredFunds.sort((a, b) => 
+      (b.donationAmount || 0) - (a.donationAmount || 0)
+    );
+    const top4Funds = sortedFunds.slice(0, 4);
+
+    const decryptedFunds = top4Funds.map((fund) => ({
+      ...fund._doc,
+      accountNumber: fund.accountNumber ? decrypt(fund.accountNumber) : null,
+      ifscCode: fund.ifscCode ? decrypt(fund.ifscCode) : null,
+    }));
+
+    res.status(200).json({
+      success: true,
+      count: decryptedFunds.length,
+      trendingFunds: decryptedFunds,
+    });
+  } catch (error) {
+    console.error("Error fetching trending funds:", error);
+    res.status(500).json({ msg: "Server error" });
+  }
+};
+
+
 const getFundById = async (req, res) => {
   const { id } = req.params;
 
@@ -185,4 +226,5 @@ module.exports = {
   getAllFunds,
   getFundById,
   getDonatorsByFundId,
+  getTrendingFunds 
 };

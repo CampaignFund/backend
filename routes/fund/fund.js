@@ -1,7 +1,7 @@
 const express = require("express");
 const upload = require("../../middleware/cloundinaryUpload");
 const checkForAuthenticationCookie = require("../../middleware/authMiddleware");
-const { handleCreateFund, getAllFunds, getFundById, getDonatorsByFundId } = require("../../controllers/fundController");
+const { handleCreateFund, getAllFunds, getFundById, getDonatorsByFundId, getTrendingFunds } = require("../../controllers/fundController");
 const router = express.Router();
 
 router.post(
@@ -15,6 +15,7 @@ router.post(
 );
 
 router.get("/fund-list", getAllFunds);
+router.get("/trending", getTrendingFunds);
 router.get("/fund-list/:id", getFundById);
 router.get("/donar-by-fundId/:fundId", getDonatorsByFundId);
 

@@ -2,10 +2,13 @@ const express = require("express");
 const {
   getUserProfileWithFundAndDonations,
   updateUserProfile,
+  getUserCreatedFunds,
 } = require("../../controllers/userController");
 const checkForAuthenticationCookie = require("../../middleware/authMiddleware");
 const upload = require("../../middleware/cloundinaryUpload");
-const { handleRequestDeletion } = require("../../controllers/deletionController");
+const {
+  handleRequestDeletion,
+} = require("../../controllers/deletionController");
 const router = express.Router();
 
 router.get(
@@ -13,6 +16,13 @@ router.get(
   checkForAuthenticationCookie("token"),
   getUserProfileWithFundAndDonations
 );
+
+router.get(
+  "/my-funds",
+  checkForAuthenticationCookie("token"),
+  getUserCreatedFunds
+);
+
 router.put(
   "/update-profile",
   checkForAuthenticationCookie("token"),
