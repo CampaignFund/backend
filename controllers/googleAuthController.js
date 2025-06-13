@@ -90,7 +90,7 @@ const googleCallback = async (req, res) => {
     const encodedRole = encodeURIComponent(user.role);
 
     return res.redirect(
-      `http://localhost:5173?name=${encodedName}&email=${encodedEmail}&role=${encodedRole}`
+      `https://frontend-zeta-nine-57.vercel.app/?name=${encodedName}&email=${encodedEmail}&role=${encodedRole}`
     );
   } catch (error) {
     console.error(error);
