@@ -5,11 +5,11 @@ const setTokenCookie = (res, token) => {
     "Set-Cookie",
     serialize("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV !== "development",
-      sameSite: "strict",
+      secure: process.env.NODE_ENV !== "development", 
+      sameSite: process.env.NODE_ENV === "development" ? "lax" : "none",
+      path: "/",
       maxAge: 60 * 60 * 24, 
     })
   );
 };
-
 module.exports = setTokenCookie;
