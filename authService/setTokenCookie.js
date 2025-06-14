@@ -4,6 +4,7 @@ const setTokenCookie = (res, token) => {
   res.setHeader(
     "Set-Cookie",
     serialize("token", token, {
+      domain: ".vercel.app",
       httpOnly: true,
       secure: true, 
       sameSite: "none",
