@@ -84,9 +84,7 @@ const login = async (req, res) => {
 
     const token = createToken(user);
     setTokenCookie(res, token);
-    console.log("Set-Cookie header:", res.getHeaders()["set-cookie"]);
     const { password: _, ...userWithoutPassword } = user.toObject();
-
     return res.status(200).json({
       message: "Login successful",
       token,
