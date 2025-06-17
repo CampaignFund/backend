@@ -5,6 +5,7 @@ const {
 const { encrypt, decrypt } = require("../encryption/encrypt");
 const CreateFund = require("../models/createFundModel");
 const Donator = require("../models/donatorModel");
+const fundReport = require("../models/fundReport");
 const User = require("../models/userModel");
 
 const handleCreateFund = async (req, res) => {
@@ -23,7 +24,6 @@ const handleCreateFund = async (req, res) => {
       bankCode,
       totalAmountRaised,
     } = req.body;
-    const user = req.user;
     const userId = req.user?.id;
 
     if (
@@ -178,6 +178,7 @@ const getFundById = async (req, res) => {
     })
       .populate("donators")
       .populate("userId", "fullName email");
+
     if (!fund) {
       return res.status(404).json({ msg: "Fund not found or not approved" });
     }
@@ -188,9 +189,14 @@ const getFundById = async (req, res) => {
       ifscCode: decrypt(fund.ifscCode),
     };
 
+    const reports = await fundReport.find({ fundId: id })
+      .sort({ createdAt: -1 })
+      .select("description image createdAt");
+
     res.status(200).json({
       success: true,
       fund: decryptedFund,
+      reports,
     });
   } catch (error) {
     console.error("Error fetching fund by ID:", error);
@@ -203,9 +209,8 @@ const getDonatorsByFundId = async (req, res) => {
 
   try {
     const donators = await Donator.find({ fundId })
-      .populate("userId", "name email") // Only include name and email of the user
-      .sort({ donatedAt: -1 }); // Optional: newest donations first
-
+      .populate("userId", "name email") 
+      .sort({ donatedAt: -1 }); 
     if (!donators.length) {
       return res.status(404).json({ msg: "No donators found for this fund" });
     }
