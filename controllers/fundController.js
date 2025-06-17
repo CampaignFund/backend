@@ -23,6 +23,10 @@ const handleCreateFund = async (req, res) => {
       upiId,
       bankCode,
       totalAmountRaised,
+      fullName,
+      email,
+      phone,
+      cityName
     } = req.body;
     const userId = req.user?.id;
 
@@ -39,6 +43,7 @@ const handleCreateFund = async (req, res) => {
 
     const qrCodeImage = req.files?.qrCodeImage?.[0]?.path || null;
     const coverImage = req.files?.coverImage?.[0]?.path || null;
+    const cnicImage = req.files?.cnicImage?.[0]?.path || null;
 
     const encryptedAccountNumber = accountNumber
       ? encrypt(accountNumber)
@@ -61,6 +66,11 @@ const handleCreateFund = async (req, res) => {
       upiId,
       qrCodeImage,
       coverImage,
+      cnicImage,
+      fullName,
+      email,
+      phone,
+      cityName,
       isApproved: false,
       totalAmountRaised,
     });

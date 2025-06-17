@@ -36,6 +36,9 @@ const createFundSchema = new mongoose.Schema(
         "ukraine_relief",
         "volunteer",
         "wishes",
+        "gaza",
+        "kashmir",
+        "Islamic_causes"
       ],
       required: true,
     },
@@ -86,9 +89,25 @@ const createFundSchema = new mongoose.Schema(
      coverImage: {
       type: String,
     },
+     cnicImage: {
+      type: String,
+    },
     donationAmount: {
       type: Number,
       default: 0,
+    },
+      phone: {
+      type: String,
+       default: null,
+    },
+    fullName: {
+      type: String,
+    },
+    cityName: {
+      type: String,
+    },
+     email: {
+      type: String,
     },
      donationCount: {
       type: Number,
