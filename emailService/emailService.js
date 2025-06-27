@@ -1,13 +1,24 @@
 const { transporter } = require("../config/nodemailer/nodemailer");
 
+const Logo = `https://res.cloudinary.com/dupvtfaoc/image/upload/v1751021742/fundraising_app/shpy31bqfs1yim4v92fq.png`;
+
 const sendResetPassword = async (name, toEmail, resetPasswordLink) => {
   try {
     const mailOptions = {
-      from: `"CampaignFund" <${process.env.ADMIN_EMAIL}>`,
+      from: `"Zaroorat" <${process.env.ADMIN_EMAIL}>`,
       to: toEmail,
-      subject: "Reset Your Password - CampaignFund",
+      subject: "Reset Your Password - Zaroorat",
       html: `
-        <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+<div style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 30px;">
+  <div style="max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 8px;">
+  
+<div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+
+<div style="text-align: center; margin-bottom: 20px;">
+  <img src="${Logo}" alt="Zaroorat Logo" style="max-width: 150px;" />
+</div>
+
+
           <h2 style="color: #0056b3;">Hello ${name},</h2>
           <p>You recently requested to reset your password for your OpportunityHub account.</p>
           <p>Please click the button below to reset your password:</p>
@@ -22,8 +33,13 @@ const sendResetPassword = async (name, toEmail, resetPasswordLink) => {
               border-radius: 5px;
           ">Reset Password</a>
           <p>If you didn’t request this, you can safely ignore this email.</p>
-          <p style="margin-top: 20px;">Thanks,<br/>The CampaignFund Team</p>
+          <p style="margin-top: 20px;">Thanks,<br/>The Zaroorat Team</p>
         </div>
+  </div>
+</div>
+
+
+        
       `,
     };
 
@@ -39,11 +55,21 @@ const sendResetPassword = async (name, toEmail, resetPasswordLink) => {
 const sendFundApprovalMailToAdmin = async ({ fund, user }) => {
   try {
     const mailOptions = {
-      from: `"CampaignFund" <${process.env.ADMIN_EMAIL}>`,
-      to: process.env.ADMIN_EMAIL, 
+      from: `"Zaroorat" <${process.env.ADMIN_EMAIL}>`,
+      to: process.env.ADMIN_EMAIL,
       subject: "New Fundraiser Created – Approval Required",
       html: `
-        <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+
+<div style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 30px;">
+  <div style="max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 8px;">
+    
+<div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+
+<div style="text-align: center; margin-bottom: 20px;">
+  <img src="${Logo}" alt="Zaroorat Logo" style="max-width: 150px;" />
+</div>
+
+
           <h2 style="color: #0056b3;">New Fundraising Request</h2>
           <p>A new fundraiser has been created and is awaiting your approval.</p>
 
@@ -62,8 +88,11 @@ const sendFundApprovalMailToAdmin = async ({ fund, user }) => {
 
           <p>Please log in to the admin panel to review and approve this fundraiser.</p>
 
-          <p style="margin-top: 20px;">Thanks,<br/>The CampaignFund Team</p>
+          <p style="margin-top: 20px;">Thanks,<br/>The Zaroorat Team</p>
         </div>
+  </div>
+</div>
+        
       `,
     };
 
@@ -74,15 +103,21 @@ const sendFundApprovalMailToAdmin = async ({ fund, user }) => {
   }
 };
 
-
 const sendFundCreationMailToUser = async ({ fund, user }) => {
   try {
     const mailOptions = {
-      from: `"CampaignFund" <${process.env.ADMIN_EMAIL}>`,
+      from: `"Zaroorat" <${process.env.ADMIN_EMAIL}>`,
       to: user.email,
-      subject: "Your Fundraiser Has Been Created - CampaignFund",
+      subject: "Your Fundraiser Has Been Created - Zaroorat",
       html: `
+<div style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 30px;">
+  <div style="max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 8px;">
+    <div style="text-align: center; margin-bottom: 20px;">
+      <img src="${Logo}" alt="Zaroorat Logo" style="max-width: 150px;" />
+    </div>
+
         <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+
           <h2 style="color: #28a745;">Hello ${user.name},</h2>
           <p>Thank you for creating a new fundraiser on CampaignFund.</p>
 
@@ -95,8 +130,10 @@ const sendFundCreationMailToUser = async ({ fund, user }) => {
 
           <p>Your request is currently under review. You will be notified once it is approved by our team.</p>
 
-          <p style="margin-top: 20px;">Thanks for making a difference!<br/>The CampaignFund Team</p>
+          <p style="margin-top: 20px;">Thanks for making a difference!<br/>The Zaroorat Team</p>
         </div>
+  </div>
+</div>
       `,
     };
 
@@ -107,6 +144,56 @@ const sendFundCreationMailToUser = async ({ fund, user }) => {
   }
 };
 
+const sendFundStatusEmailToUser = async ({ fund, user, status }) => {
+  try {
+    const mailOptions = {
+      from: `"Zaroorat" <${process.env.ADMIN_EMAIL}>`,
+      to: user.email,
+      subject: `Your Fundraiser Has Been ${status}`,
+      html: `
+<div style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 30px;">
+  <div style="max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 8px;">
+<div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+<div style="text-align: center; margin-bottom: 20px;">
+  <img src="${Logo}" alt="Zaroorat Logo" style="max-width: 150px;" />
+</div>
+          <h2 style="color: ${status === "Approved" ? "#28a745" : "#dc3545"};">
+            Fundraiser ${status}
+          </h2>
 
+          <p>Hi ${user.fullName},</p>
 
-module.exports = { sendResetPassword ,sendFundApprovalMailToAdmin,sendFundCreationMailToUser};
+          <p>Your fundraiser has been <strong>${status}</strong> by the admin.</p>
+
+          <h3>Fundraiser Details:</h3>
+          <ul>
+            <li><strong>Title:</strong> ${fund.fundraiseTitle}</li>
+            <li><strong>Category:</strong> ${fund.fundCategory}</li>
+            <li><strong>Target Amount:</strong> ₹${fund.totalAmountRaised}</li>
+          </ul>
+
+          ${
+            status === "Approved"
+              ? `<p>You can now view your fundraiser live on the platform.</p>`
+              : `<p>Unfortunately, your fundraiser was not approved. Please contact support if you have any questions.</p>`
+          }
+          <p style="margin-top: 20px;">Thanks,<br/>The Zaroorat Team</p>
+        </div>
+  </div>
+</div>   
+      `,
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log("User fund status email sent:", info.messageId);
+  } catch (error) {
+    console.error("Error sending user fund status email:", error);
+  }
+};
+
+module.exports = {
+  sendResetPassword,
+  sendFundApprovalMailToAdmin,
+  sendFundCreationMailToUser,
+  sendFundStatusEmailToUser,
+};

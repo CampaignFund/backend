@@ -4,7 +4,6 @@ const userSchema = new mongoose.Schema(
   {
     googleId: {
       type: String,
-      default: null,
     },
     status: {
       type: String,
