@@ -3,7 +3,7 @@ const CreateFund = require("../models/createFundModel");
 
 const getPendingFunds = async (req, res) => {
   try {
-    const pendingFunds = await CreateFund.find({ isApproved: false });
+    const pendingFunds = await CreateFund.find({ isApproved: false }).populate("userId");
     res.status(200).json({ pendingFunds });
   } catch (error) {
     res.status(500).json({ msg: "Server error while fetching pending funds" });
