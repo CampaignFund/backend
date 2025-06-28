@@ -6,6 +6,7 @@ const {
 } = require("../../controllers/adminController");
 const { authorizeRoles } = require("../../middleware/roleMiddleware");
 const checkForAuthenticationCookie = require("../../middleware/authMiddleware");
+const { adminDeleteFund } = require("../../controllers/fundController");
 const router = express.Router();
 
 router.get(
@@ -26,5 +27,7 @@ router.delete(
   authorizeRoles(["admin"]),
   rejectFund
 );
+router.delete("/fund-raise/:id",checkForAuthenticationCookie("token"),
+  authorizeRoles(["admin"]),  adminDeleteFund);
 
 module.exports = router;

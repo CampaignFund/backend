@@ -7,6 +7,7 @@ const {
   getFundById,
   getDonatorsByFundId,
   getTrendingFunds,
+  deleteMyFund,
 } = require("../../controllers/fundController");
 const { submitFundReport } = require("../../controllers/fundReportController");
 const router = express.Router();
@@ -31,5 +32,11 @@ router.get("/fund-list", getAllFunds);
 router.get("/trending", getTrendingFunds);
 router.get("/fund-list/:id", getFundById);
 router.get("/donar-by-fundId/:fundId", getDonatorsByFundId);
+
+router.delete(
+  "/fund-list/:id",
+  checkForAuthenticationCookie("token"),
+  deleteMyFund
+);
 
 module.exports = router;

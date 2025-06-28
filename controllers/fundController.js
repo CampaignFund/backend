@@ -26,7 +26,7 @@ const handleCreateFund = async (req, res) => {
       fullName,
       email,
       phone,
-      cityName
+      cityName,
     } = req.body;
     const userId = req.user?.id;
 
@@ -77,7 +77,13 @@ const handleCreateFund = async (req, res) => {
 
     await newFund.save();
     await sendFundApprovalMailToAdmin({
-      fund: newFund,
+      fund: {
+        ...newFund._doc,
+        accountNumber: newFund.accountNumber
+          ? decrypt(newFund.accountNumber)
+          : null,
+        ifscCode: newFund.ifscCode ? decrypt(newFund.ifscCode) : null,
+      },
       user: {
         name: req.user.fullName,
         email: req.user.email,
@@ -117,7 +123,7 @@ const getAllFunds = async (req, res) => {
 
     const funds = await CreateFund.find(filter)
       .populate("donators")
-      .populate("userId", "fullName email")
+      .populate("userId")
       .sort({ createdAt: -1 });
 
     const decryptedFunds = funds.map((fund) => ({
@@ -141,7 +147,7 @@ const getTrendingFunds = async (req, res) => {
   try {
     const approvedFunds = await CreateFund.find({ isApproved: true })
       .populate("donators")
-      .populate("userId", "fullName email");
+      .populate("userId");
 
     const filteredFunds = approvedFunds.filter((fund) => {
       const donationAmount = fund.donationAmount || 0;
@@ -150,13 +156,13 @@ const getTrendingFunds = async (req, res) => {
       return (
         totalRaised > 0 &&
         (donationAmount >= totalRaised / 2 ||
-         donationAmount >= totalRaised / 3 ||
-         donationAmount >= totalRaised / 4)
+          donationAmount >= totalRaised / 3 ||
+          donationAmount >= totalRaised / 4)
       );
     });
 
-    const sortedFunds = filteredFunds.sort((a, b) => 
-      (b.donationAmount || 0) - (a.donationAmount || 0)
+    const sortedFunds = filteredFunds.sort(
+      (a, b) => (b.donationAmount || 0) - (a.donationAmount || 0)
     );
     const top4Funds = sortedFunds.slice(0, 4);
 
@@ -177,7 +183,6 @@ const getTrendingFunds = async (req, res) => {
   }
 };
 
-
 const getFundById = async (req, res) => {
   const { id } = req.params;
 
@@ -187,7 +192,7 @@ const getFundById = async (req, res) => {
       isApproved: true,
     })
       .populate("donators")
-      .populate("userId", "fullName email");
+      .populate("userId");
 
     if (!fund) {
       return res.status(404).json({ msg: "Fund not found or not approved" });
@@ -199,7 +204,8 @@ const getFundById = async (req, res) => {
       ifscCode: decrypt(fund.ifscCode),
     };
 
-    const reports = await fundReport.find({ fundId: id })
+    const reports = await fundReport
+      .find({ fundId: id })
       .sort({ createdAt: -1 })
       .select("description image createdAt");
 
@@ -219,8 +225,8 @@ const getDonatorsByFundId = async (req, res) => {
 
   try {
     const donators = await Donator.find({ fundId })
-      .populate("userId", "name email") 
-      .sort({ donatedAt: -1 }); 
+      .populate("userId", "name email")
+      .sort({ donatedAt: -1 });
     if (!donators.length) {
       return res.status(404).json({ msg: "No donators found for this fund" });
     }
@@ -236,10 +242,54 @@ const getDonatorsByFundId = async (req, res) => {
   }
 };
 
+const deleteMyFund = async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user.id;
+
+  try {
+    const fund = await CreateFund.findById(id);
+
+    if (!fund) {
+      return res.status(404).json({ msg: "Fund not found" });
+    }
+
+    if (fund.userId.toString() !== userId) {
+      return res.status(403).json({ msg: "Unauthorized to delete this fund" });
+    }
+
+    await CreateFund.findByIdAndDelete(id);
+    res.status(200).json({ success: true, msg: "Fund deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting fund:", error);
+    res.status(500).json({ msg: "Server error" });
+  }
+};
+
+const adminDeleteFund = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const fund = await CreateFund.findById(id);
+    if (!fund) {
+      return res.status(404).json({ msg: "Fund not found" });
+    }
+
+    await CreateFund.findByIdAndDelete(id);
+    res
+      .status(200)
+      .json({ success: true, msg: "Fund deleted by admin successfully" });
+  } catch (error) {
+    console.error("Admin delete fund error:", error);
+    res.status(500).json({ msg: "Server error" });
+  }
+};
+
 module.exports = {
   handleCreateFund,
   getAllFunds,
   getFundById,
   getDonatorsByFundId,
-  getTrendingFunds 
+  getTrendingFunds,
+  deleteMyFund,
+  adminDeleteFund,
 };

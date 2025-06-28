@@ -1,3 +1,4 @@
+const { sendDonationNotificationToAdmin, sendThankYouEmailToDonor } = require("../emailService/emailService");
 const CreateFund = require("../models/createFundModel");
 const Donator = require("../models/donatorModel");
 
@@ -35,6 +36,11 @@ const donateAmount = async (req, res) => {
     fund.donationAmount += parseFloat(amount);
     fund.donationCount += 1;
     await fund.save();
+
+
+    await sendDonationNotificationToAdmin({ donor: newDonor, fund });
+    await sendThankYouEmailToDonor({ donor: newDonor, fund });
+
 
     res.status(201).json({
       msg: "Donation successful!",
