@@ -20,7 +20,7 @@ const sendResetPassword = async (name, toEmail, resetPasswordLink) => {
 
 
           <h2 style="color: #0056b3;">Hello ${name},</h2>
-          <p>You recently requested to reset your password for your OpportunityHub account.</p>
+          <p>You recently requested to reset your password for your zaroorat account.</p>
           <p>Please click the button below to reset your password:</p>
           <a href="${resetPasswordLink}" style="
               display: inline-block;

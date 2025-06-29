@@ -16,7 +16,6 @@ router.post(
   "/create-fundraise",
   checkForAuthenticationCookie("token"),
   upload.fields([
-    { name: "qrCodeImage", maxCount: 1 },
     { name: "coverImage", maxCount: 1 },
     { name: "cnicImage", maxCount: 1 },
   ]),

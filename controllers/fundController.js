@@ -2,7 +2,6 @@ const {
   sendFundApprovalMailToAdmin,
   sendFundCreationMailToUser,
 } = require("../emailService/emailService");
-const { encrypt, decrypt } = require("../encryption/encrypt");
 const CreateFund = require("../models/createFundModel");
 const Donator = require("../models/donatorModel");
 const fundReport = require("../models/fundReport");
@@ -29,6 +28,7 @@ const handleCreateFund = async (req, res) => {
       cityName,
     } = req.body;
     const userId = req.user?.id;
+        if (!req.user) return res.status(401).json({ msg: "Unauthorized" });
 
     if (
       !country ||
@@ -41,14 +41,9 @@ const handleCreateFund = async (req, res) => {
       return res.status(400).json({ msg: "Please fill all required fields" });
     }
 
-    const qrCodeImage = req.files?.qrCodeImage?.[0]?.path || null;
+
     const coverImage = req.files?.coverImage?.[0]?.path || null;
     const cnicImage = req.files?.cnicImage?.[0]?.path || null;
-
-    const encryptedAccountNumber = accountNumber
-      ? encrypt(accountNumber)
-      : null;
-    const encryptedIFSC = ifscCode ? encrypt(ifscCode) : null;
 
     const newFund = new CreateFund({
       userId,
@@ -59,12 +54,11 @@ const handleCreateFund = async (req, res) => {
       fundraiseStory,
       donationAmount: 0,
       accountHolderName,
-      accountNumber: encryptedAccountNumber,
-      ifscCode: encryptedIFSC,
+      accountNumber,
+      ifscCode,
       bankCode,
       bankName,
       upiId,
-      qrCodeImage,
       coverImage,
       cnicImage,
       fullName,
@@ -76,27 +70,23 @@ const handleCreateFund = async (req, res) => {
     });
 
     await newFund.save();
-    await sendFundApprovalMailToAdmin({
-      fund: {
-        ...newFund._doc,
-        accountNumber: newFund.accountNumber
-          ? decrypt(newFund.accountNumber)
-          : null,
-        ifscCode: newFund.ifscCode ? decrypt(newFund.ifscCode) : null,
-      },
-      user: {
-        name: req.user.fullName,
-        email: req.user.email,
-      },
-    });
 
-    await sendFundCreationMailToUser({
-      fund: newFund,
-      user: {
-        name: req.user.fullName,
-        email: req.user.email,
-      },
-    });
+   await Promise.all([
+      sendFundApprovalMailToAdmin({
+        fund: newFund,
+        user: {
+          name: req.user.fullName,
+          email: req.user.email,
+        },
+      }),
+      sendFundCreationMailToUser({
+        fund: newFund,
+        user: {
+          name: req.user.fullName,
+          email: req.user.email,
+        },
+      }),
+    ]);
 
     res.status(201).json({
       msg: "Fundraising created successfully!",
@@ -126,16 +116,10 @@ const getAllFunds = async (req, res) => {
       .populate("userId")
       .sort({ createdAt: -1 });
 
-    const decryptedFunds = funds.map((fund) => ({
-      ...fund._doc,
-      accountNumber: fund.accountNumber ? decrypt(fund.accountNumber) : null,
-      ifscCode: fund.ifscCode ? decrypt(fund.ifscCode) : null,
-    }));
-
     res.status(200).json({
       success: true,
-      count: decryptedFunds.length,
-      funds: decryptedFunds,
+      count: funds.length,
+      funds: funds,
     });
   } catch (error) {
     console.error("Error fetching funds:", error);
@@ -166,16 +150,10 @@ const getTrendingFunds = async (req, res) => {
     );
     const top4Funds = sortedFunds.slice(0, 4);
 
-    const decryptedFunds = top4Funds.map((fund) => ({
-      ...fund._doc,
-      accountNumber: fund.accountNumber ? decrypt(fund.accountNumber) : null,
-      ifscCode: fund.ifscCode ? decrypt(fund.ifscCode) : null,
-    }));
-
     res.status(200).json({
       success: true,
-      count: decryptedFunds.length,
-      trendingFunds: decryptedFunds,
+      count: top4Funds.length,
+      trendingFunds: top4Funds,
     });
   } catch (error) {
     console.error("Error fetching trending funds:", error);
@@ -198,12 +176,6 @@ const getFundById = async (req, res) => {
       return res.status(404).json({ msg: "Fund not found or not approved" });
     }
 
-    const decryptedFund = {
-      ...fund._doc,
-      accountNumber: decrypt(fund.accountNumber),
-      ifscCode: decrypt(fund.ifscCode),
-    };
-
     const reports = await fundReport
       .find({ fundId: id })
       .sort({ createdAt: -1 })
@@ -211,7 +183,7 @@ const getFundById = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      fund: decryptedFund,
+      fund: fund,
       reports,
     });
   } catch (error) {
