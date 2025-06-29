@@ -20,6 +20,12 @@ const userSchema = new mongoose.Schema(
     profilePhoto: {
       type: String,
     },
+     cityName: {
+      type: String,
+    },
+    cnicImage: {
+      type: String,
+    },
     email: {
       type: String,
       required: true,
@@ -38,5 +44,4 @@ const userSchema = new mongoose.Schema(
 );
 
 const User = mongoose.model("user", userSchema);
-
 module.exports = User;

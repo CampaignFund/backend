@@ -7,9 +7,8 @@ const {
   handleResetPassword,
   handleLogout,
 } = require("../../controllers/userController");
-const upload = require("../../middleware/cloundinaryUpload");
 
-router.post("/signup",  upload.single("profilePhoto"),signup);
+router.post("/signup", signup);
 router.post("/login", login);
 router.post("/logout", handleLogout);
 router.post("/forgot-password", forgotPassword);

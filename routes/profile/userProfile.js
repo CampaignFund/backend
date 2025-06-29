@@ -26,7 +26,7 @@ router.get(
 router.put(
   "/update-profile",
   checkForAuthenticationCookie("token"),
-  upload.single("profilePhoto"),
+  upload.single("cnicImage"),
   updateUserProfile
 );
 

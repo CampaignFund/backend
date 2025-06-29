@@ -15,10 +15,7 @@ const router = express.Router();
 router.post(
   "/create-fundraise",
   checkForAuthenticationCookie("token"),
-  upload.fields([
-    { name: "coverImage", maxCount: 1 },
-    { name: "cnicImage", maxCount: 1 },
-  ]),
+  upload.single("coverImage"),
   handleCreateFund
 );
 router.post(

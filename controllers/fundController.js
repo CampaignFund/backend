@@ -22,13 +22,26 @@ const handleCreateFund = async (req, res) => {
       upiId,
       bankCode,
       totalAmountRaised,
-      fullName,
-      email,
-      phone,
-      cityName,
     } = req.body;
-    const userId = req.user?.id;
-        if (!req.user) return res.status(401).json({ msg: "Unauthorized" });
+    if (!req.user) return res.status(401).json({ msg: "Unauthorized" });
+    const userId = req.user.id;
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ msg: "User not found" });
+
+    const { fullName, email, cnicImage, cityName, phone } = user;
+
+    if (
+      !fullName?.trim() ||
+      !email?.trim() ||
+      !cnicImage?.trim() ||
+      !cityName?.trim() ||
+      !phone?.trim()
+    ) {
+      return res.status(400).json({
+        msg: "Please complete your profile before creating a fund. Required fields: fullName, email, CNIC image, city, phone.",
+      });
+    }
 
     if (
       !country ||
@@ -41,9 +54,7 @@ const handleCreateFund = async (req, res) => {
       return res.status(400).json({ msg: "Please fill all required fields" });
     }
 
-
-    const coverImage = req.files?.coverImage?.[0]?.path || null;
-    const cnicImage = req.files?.cnicImage?.[0]?.path || null;
+    const coverImage = req.file ? req.file.path : undefined;
 
     const newFund = new CreateFund({
       userId,
@@ -60,18 +71,13 @@ const handleCreateFund = async (req, res) => {
       bankName,
       upiId,
       coverImage,
-      cnicImage,
-      fullName,
-      email,
-      phone,
-      cityName,
       isApproved: false,
       totalAmountRaised,
     });
 
     await newFund.save();
 
-   await Promise.all([
+    await Promise.all([
       sendFundApprovalMailToAdmin({
         fund: newFund,
         user: {

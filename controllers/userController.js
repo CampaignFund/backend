@@ -20,11 +20,11 @@ const isValidPassword = (password) => {
 };
 
 const signup = async (req, res) => {
-  const { fullName, phone, email, password } = req.body;
+  const { fullName, phone, email, password ,profilePhoto,cityName,cnicImage} = req.body;
   if (!fullName || !email || !password || !phone) {
     return res.json({ success: false, message: "All fields are required" });
   }
-  const profilePhoto = req.file ? req.file.path : null;
+
 
   try {
     const existingUser = await User.findOne({ email });
@@ -49,6 +49,8 @@ const signup = async (req, res) => {
       email,
       password: hashedPassword,
       profilePhoto,
+      cityName,
+      cnicImage
     };
 
     const newUser = await User.create(newUserData);
@@ -224,13 +226,14 @@ const updateUserProfile = async (req, res) => {
   try {
     const userId = req.user.id;
 
-    const { fullName, phone } = req.body;
-    const profilePhoto = req.file ? req.file.path : undefined;
+    const { fullName, phone,cityName } = req.body;
+    const cnicImage = req.file ? req.file.path : undefined;
 
     const updateData = {};
     if (fullName) updateData.fullName = fullName;
     if (phone) updateData.phone = phone;
-    if (profilePhoto) updateData.profilePhoto = profilePhoto;
+    if (cnicImage) updateData.cnicImage = cnicImage;
+     if (cityName) updateData.cityName = cityName;
 
     const updatedUser = await User.findByIdAndUpdate(userId, updateData, {
       new: true,
